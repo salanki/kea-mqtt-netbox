@@ -19,7 +19,7 @@ check-ip() {
 
   while [ $IP_ADDRESSES_URL != null ]; do
     IP_ADDRESSES=$(get-ips $IP_ADDRESSES_URL)
-    for row in $(echo $IP_ADDRESSES | jq -r '.results[] | @base64'); do
+    for row in $(echo $IP_ADDRESSES | jq -r ".results[] | select(.address | startswith(\"$KEA_LEASE4_ADDRESS\")) | @base64"); do
       CURRENT_IP=$(echo $row | base64 --decode | jq -r ".address" | cut -d '/' -f 1)
       CURRENT_ID=$(echo $row | base64 --decode | jq -r ".id")
       if [ "$CURRENT_IP" = "$KEA_LEASE4_ADDRESS" ]; then echo -n $CURRENT_ID; return 0; fi
@@ -36,9 +36,9 @@ tenant-from-hostname() {
  if [ -z "$HOSTNAME" ] || [ "$HOSTNAME" = "" ]; then echo -n $DEFAULT_TENANT; return 1; fi
 
  for row in $(cat $TENANT_FILE | jq -r ".[] | select(.hostname==\"$HOSTNAME\") | @base64"); do
-     CURRENT_HOSTNAME=$(echo $row | base64 --decode | jq -r ".hostname" | cut -d '/' -f 1)
      CURRENT_TENANT=$(echo $row | base64 --decode | jq -r ".tenant")
-     if [ "$CURRENT_HOSTNAME" = "$HOSTNAME" ]; then echo -n $CURRENT_TENANT; return 0; fi
+     echo -n $CURRENT_TENANT
+     return 0
  done
  echo -n $DEFAULT_TENANT
  return 1
