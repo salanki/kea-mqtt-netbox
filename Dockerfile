@@ -12,6 +12,7 @@ RUN mkdir -p /app
 
 ADD ./napi.sh /app
 ADD ./listen.sh /app
+ADD ./wrapper.sh /app
 
 WORKDIR /app
 

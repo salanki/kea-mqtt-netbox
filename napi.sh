@@ -11,6 +11,8 @@ done
 
 COMMAND=$KEA_COMMAND
 
+echo "Command: $COMMAND"
+
 check-ip() {
   IP="$KEA_LEASE4_ADDRESS/$KEA_SUBNET4_PREFIXLEN"
   IP_ADDRESSES_URL="http://$NETBOX_HOSTNAME/api/ipam/ip-addresses/"
@@ -30,10 +32,10 @@ check-ip() {
 
 tenant-from-hostname() {
  HOSTNAME=$1 
- 
+
  if [ -z "$HOSTNAME" ] || [ "$HOSTNAME" = "" ]; then echo -n $DEFAULT_TENANT; return 1; fi
 
- for row in $(cat $TENANT_FILE | jq -r '.[] | @base64'); do
+ for row in $(cat $TENANT_FILE | jq -r ".[] | select(.hostname==\"$HOSTNAME\") | @base64"); do
      CURRENT_HOSTNAME=$(echo $row | base64 --decode | jq -r ".hostname" | cut -d '/' -f 1)
      CURRENT_TENANT=$(echo $row | base64 --decode | jq -r ".tenant")
      if [ "$CURRENT_HOSTNAME" = "$HOSTNAME" ]; then echo -n $CURRENT_TENANT; return 0; fi
