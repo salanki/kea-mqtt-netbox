@@ -1,0 +1,15 @@
+version: '3'
+services:
+  mqtt-netbox:
+    build: . 
+    environment:
+      NETBOX_TOKEN: 'token'
+      NETBOX_HOSTNAME: localhost
+      TENANT_FILE: /opt/meta/hostmap.json
+      DEFAULT_TENANT: temp
+      DEBUG: 0
+      MQTT_BROKER: localhost
+      MQTT_TOPIC: infra/dhcp
+    volumes:
+      - /opt/meta:/opt/meta
+    restart: always
