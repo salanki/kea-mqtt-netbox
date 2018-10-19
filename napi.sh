@@ -15,7 +15,7 @@ echo "Command: $COMMAND"
 
 check-ip() {
   IP="$KEA_LEASE4_ADDRESS/$KEA_SUBNET4_PREFIXLEN"
-  IP_ADDRESSES_URL="http://$NETBOX_HOSTNAME/api/ipam/ip-addresses/"
+  IP_ADDRESSES_URL="http://$NETBOX_HOSTNAME/api/ipam/ip-addresses/?q=$KEA_LEASE4_ADDRESS"
 
   while [ $IP_ADDRESSES_URL != null ]; do
     IP_ADDRESSES=$(get-ips $IP_ADDRESSES_URL)
@@ -124,11 +124,18 @@ fi
 
 case "$COMMAND" in
 "lease4_select" | "lease4_renew" )
+  if [ "$KEA_FAKE_ALLOCATION" == "1" ]; then
+    # echo "Fake allocation $KEA_LEASE4_ADDRESS" >> $LOGFILE
+    exit 0
+  fi
   KEY=$(get-session-key)
   ID=$(check-ip)
   TENANT=$(tenant-from-hostname $KEA_LEASE4_HOSTNAME)
   TENANT_ID=$(tenant-to-id $TENANT)
   logger
+
+  echo "Tenant: $TENANT Id: $TENANT_ID Hostname: $KEA_LEASE4_HOSTNAME"
+
   if [ "$ID" == "" ]; then
     create-ip
   else
